@@ -1,0 +1,41 @@
+
+name: Build NEON PULSE APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'NeonPulse_AutoBuild.zip'
+      - '.github/workflows/build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get project
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
+
+      - name: Extract project
+        run: |
+          unzip -o NeonPulse_AutoBuild.zip
+          test -f NeonPulse_AutoBuild/app/build.gradle
+
+      - name: Build APK
+        run: gradle -p NeonPulse_AutoBuild assembleDebug
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEON-PULSE-APK
+          path: NeonPulse_AutoBuild/app/build/outputs/apk/debug/*.apk
